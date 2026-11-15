@@ -29,7 +29,7 @@ test('migrations are repeatable and data survives reopening with WAL and foreign
       assert.deepEqual(second.sqlite.prepare("SELECT value FROM platform_metadata WHERE key = 'test'").get(), { value: 'persisted' });
       assert.equal(second.sqlite.pragma('journal_mode', { simple: true }), 'wal');
       assert.equal(second.sqlite.pragma('foreign_keys', { simple: true }), 1);
-      assert.deepEqual(second.sqlite.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get(), { count: 3 });
+      assert.deepEqual(second.sqlite.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get(), { count: 4 });
     } finally { second.sqlite.close(); }
   } finally { rmSync(directory, { recursive: true, force: true }); }
 });

@@ -52,3 +52,23 @@ export type Session = z.infer<typeof sessionSchema>;
 export type Game = z.infer<typeof gameSchema>;
 export type Role = z.infer<typeof roleSchema>;
 export type Comment = z.infer<typeof commentSchema>;
+
+export const repositoryUrlSchema = z.string().trim().max(250).refine(value => {
+  const match = /^https:\/\/github\.com\/([a-z0-9](?:[a-z0-9-]{0,37}[a-z0-9])?)\/([a-z0-9_.-]{1,100})\/?$/i.exec(value);
+  if (!match) return false;
+  const name = match[2].replace(/\.git$/i, '');
+  return name !== '' && name !== '.' && name !== '..';
+}, 'Вставьте ссылку вида https://github.com/owner/repository — на сам репозиторий.').transform(value => {
+  const parts = value.replace(/\/$/, '').split('/');
+  return `https://github.com/${parts[3]}/${parts[4].replace(/\.git$/i, '')}`;
+});
+export const repositoryInputSchema = z.object({ repositoryUrl: repositoryUrlSchema }).strict();
+export const commitShaSchema = z.string().regex(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/);
+export const repositorySchema = z.object({
+  repositoryUrl: z.string(), branch: z.literal('main'),
+  latestCommitSha: commitShaSchema.nullable(), commitMessage: z.string().nullable(),
+  commitDate: z.string().nullable(), checkedAt: z.number().nullable(),
+  deployedCommitSha: commitShaSchema.nullable(),
+  status: z.enum(['not_checked', 'not_published', 'up_to_date', 'update_available']),
+});
+export type Repository = z.infer<typeof repositorySchema>;

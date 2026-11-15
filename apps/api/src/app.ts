@@ -4,14 +4,19 @@ import { healthSchema } from '@playground/shared';
 import { openDatabase } from './database.js';
 import { ZodError } from 'zod';
 import { accountRoutes, type AuthOptions } from './routes.js';
+import { PublicGitHubClient, GitHubError, type GitHubReader } from './github.js';
 
-export function createApp(databasePath: string, logger = false, options: AuthOptions = { origin: 'http://127.0.0.1:5173', secureCookies: false }) {
+export function createApp(databasePath: string, logger = false, options: AuthOptions = { origin: 'http://127.0.0.1:5173', secureCookies: false }, github: GitHubReader = new PublicGitHubClient()) {
   const database = openDatabase(databasePath);
   const app = Fastify({
     bodyLimit: 64 * 1024,
     logger: logger ? { redact: ['req.headers.cookie', 'req.headers.authorization', 'req.headers["x-csrf-token"]', 'res.headers["set-cookie"]'] } : false,
   });
   app.setErrorHandler<FastifyError>((error, request, reply) => {
+    if (error instanceof GitHubError) {
+      if (error.retryAfter) reply.header('Retry-After', error.retryAfter);
+      return reply.code(error.statusCode).send({ message: error.message });
+    }
     if (error instanceof ZodError) return reply.code(400).send({ message: 'Проверьте заполненные поля и ограничения длины.' });
     if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') return reply.code(409).send({ message: 'Такое имя пользователя или адрес игры уже занят.' });
     if (error.code === 'SQLITE_CONSTRAINT_FOREIGNKEY') return reply.code(400).send({ message: 'Одна из выбранных игр не найдена.' });
@@ -25,7 +30,7 @@ export function createApp(databasePath: string, logger = false, options: AuthOpt
     database.db.get(sql`SELECT 1`);
     return healthSchema.parse({ status: 'ok', database: 'ok' });
   });
-  app.register(async scope => { await accountRoutes(scope, database.sqlite, options); });
+  app.register(async scope => { await accountRoutes(scope, database.sqlite, options, github); });
   app.addHook('onClose', async () => { database.sqlite.close(); });
   return app;
 }

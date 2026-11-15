@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { openDatabase } from '../apps/api/src/database.js';
 import { createAccount } from '../apps/api/src/accounts.js';
 import { createApp } from '../apps/api/src/app.js';
+import { GitHubError, type GitHubReader } from '../apps/api/src/github.js';
 
 const directory = mkdtempSync(join(tmpdir(), 'playground-browser-'));
 const path = join(directory, 'test.sqlite');
@@ -21,7 +22,18 @@ for (const [slug, title] of [['first-game', 'Первая игра'], ['second-g
     .run(randomUUID(), slug, title, 'Тестируем идеи вместе. <script>window.untrusted = true</script>', Date.now(), Date.now());
 }
 sqlite.close();
-const app = createApp(path, false, { origin: 'http://127.0.0.1:5174', secureCookies: false });
+let githubChecks = 0;
+const github: GitHubReader = {
+  async inspect(repositoryUrl) {
+    if (repositoryUrl !== 'https://github.com/test-team/public-game') throw new GitHubError(422, 'Тестовый репозиторий не найден.');
+    githubChecks++;
+    return {
+      repositoryId: 123, repositoryUrl, sha: (githubChecks === 1 ? 'a' : 'b').repeat(40),
+      message: githubChecks === 1 ? 'Initial public main' : 'Updated public main', date: '2026-11-15T12:00:00Z',
+    };
+  },
+};
+const app = createApp(path, false, { origin: 'http://127.0.0.1:5174', secureCookies: false }, github);
 await app.listen({ host: '127.0.0.1', port: 3002 });
 let closing = false;
 async function close() {

@@ -25,6 +25,8 @@ This file is the primary instruction document for coding agents working on Playg
 
 ## 2. Confirmed Product Decisions
 
+**User update (2026-11-15):** initial scope is three developers, running locally on the owner's laptop with a future VPS migration. Game repositories are currently public. M3 must accept a GitHub repository URL without credentials, always use `main`, and check updates only on demand. GitHub App/private repository support and branch selection are deferred until requested. This update supersedes the corresponding original defaults below and in the M3 milestone.
+
 - Hosting: one VPS.
 - Expected users: 3–10 initially.
 - Games: browser-based HTML5 games using Vite, JavaScript, or TypeScript.

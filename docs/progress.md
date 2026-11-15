@@ -57,3 +57,13 @@ Verification:
 - Build, typecheck and lint passed. Docker runtime remains untested; the local Node/Vite servers are the current target.
 
 No test games or credentials were inserted into the owner's database. Current game entries are metadata/discussion pages; launch is unavailable until releases exist. Next: M3 — GitHub App configuration, private repository access, branch selection and manual commit checks. Builder isolation and private artifact delivery remain later decisions requiring review.
+
+## M3 — Public repositories and main checks (updated owner scope)
+
+The owner requested public repositories, no GitHub App/credentials and a fixed main branch. Implemented URL normalization/validation, authenticated Admin connection management, manual GitHub checks, saved commit metadata and separate observed/published version status. Network access is bounded and pinned to GitHub; no automatic polling, cloning, building or publication occurs.
+
+Additive migration 0004 preserves current accounts, games, comments and covers. Failed checks keep the last snapshot. Connection IDs/revisions and post-network authorization checks prevent stale responses from replacing a changed/disconnected connection or writing after session revocation.
+
+Verification: 28 server tests passed, all three Edge browser scenarios passed (including desktop/mobile repository UI), build/typecheck/lint passed. A real unauthenticated client read the main commit of maksasGit/needle successfully without writing the working database. Docker runtime remains untested.
+
+Next: M4 — isolated source download/build, artifact validation, publication and rollback. Builder isolation must be reviewed before untrusted scripts run. GitHub App/private repositories and selectable branches remain deferred per the owner's explicit update.

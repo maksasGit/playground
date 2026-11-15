@@ -14,6 +14,7 @@ export function openDatabase(path: string) {
     new URL('../migrations/0001_foundation.sql', import.meta.url),
     new URL('../migrations/0002_accounts.sql', import.meta.url),
     new URL('../migrations/0003_games_comments.sql', import.meta.url),
+    new URL('../migrations/0004_public_repositories.sql', import.meta.url),
   ];
   sqlite.transaction(() => {
     for (const [index, file] of migrations.entries()) {
