@@ -1,0 +1,20 @@
+{
+  "name": "playground",
+  "private": true,
+  "packageManager": "pnpm@10.34.5",
+  "scripts": {
+    "dev": "pnpm --filter @playground/shared build && concurrently -k -n api,web \"pnpm --filter @playground/api dev\" \"pnpm --filter @playground/web dev\"",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "test": "pnpm --filter @playground/api test",
+    "db:migrate": "pnpm --filter @playground/api db:migrate"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "typescript-eslint": "^8.0.0",
+    "concurrently": "^9.0.0",
+    "typescript": "~5.8.3"
+  }
+}
