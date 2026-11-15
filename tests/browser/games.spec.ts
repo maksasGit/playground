@@ -13,7 +13,7 @@ test('create project, upload cover, discuss, moderate, assign access and archive
   await login('editor', 'browser-test-editor-password');
   await page.getByRole('link', { name: '+ Добавить игру', exact: true }).click();
   await page.getByLabel('Название игры').fill('Orbit Lab');
-  await page.getByLabel('Адрес игры').fill('orbit-lab');
+  await page.getByLabel('Короткий адрес страницы').fill('orbit-lab');
   await page.getByLabel('Описание', { exact: true }).fill('Небольшой орбитальный эксперимент.\nПроверяем управление и собираем обратную связь команды.');
   await page.getByRole('button', { name: 'Создать карточку', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Orbit Lab', exact: true })).toBeVisible();
