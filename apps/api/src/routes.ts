@@ -11,12 +11,13 @@ import { fail, requireUser, requireAdmin } from './access.js';
 import { gameRoutes } from './games.js';
 import { repositoryRoutes } from './repositories.js';
 import type { GitHubReader } from './github.js';
+import { buildRoutes, type RuntimeOptions } from './builds.js';
 export interface AuthOptions { origin: string; secureCookies: boolean }
 const SESSION_MS = 12 * 60 * 60 * 1000;
 const digest = (token: string) => createHash('sha256').update(token).digest('hex');
 
 
-export async function accountRoutes(app: FastifyInstance, sqlite: Database.Database, options: AuthOptions, github: GitHubReader) {
+export async function accountRoutes(app: FastifyInstance, sqlite: Database.Database, options: AuthOptions, github: GitHubReader, runtime: RuntimeOptions) {
   await app.register(cookie);
   await app.register(rateLimit, { max: 300, timeWindow: '1 minute' });
   app.decorateRequest('auth', null);
@@ -166,4 +167,5 @@ export async function accountRoutes(app: FastifyInstance, sqlite: Database.Datab
 
   await gameRoutes(app, sqlite);
   repositoryRoutes(app, sqlite, github);
+  buildRoutes(app, sqlite, runtime);
 }

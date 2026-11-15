@@ -11,6 +11,7 @@ import { fail, requireAdmin, requireUser } from './access.js';
 interface GameRow {
   id: string; slug: string; title: string; description: string;
   cover: string | null; updated_at: number; archived: number;
+  active_release_id: string | null; deployed_commit_sha: string | null;
 }
 interface CommentRow {
   id: string; game_id: string; author_user_id: string; body: string;
@@ -44,6 +45,7 @@ export async function gameRoutes(app: FastifyInstance, sqlite: Database.Database
       cover: row.cover ? `/api/games/${encodeURIComponent(row.slug)}/cover?v=${row.cover}` : null,
       updatedAt: row.updated_at, archived: Boolean(row.archived),
       canComment: !row.archived && user.role !== 'Viewer', canModerate: user.role === 'Admin',
+      activeReleaseId: row.active_release_id, deployedCommitSha: row.deployed_commit_sha,
     };
   }
   function commentRow(id: string, gameId: string) {

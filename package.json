@@ -3,7 +3,8 @@
   "private": true,
   "packageManager": "pnpm@10.34.5",
   "scripts": {
-    "dev": "pnpm --filter @playground/shared build && concurrently -k -n api,web \"pnpm --filter @playground/api dev\" \"pnpm --filter @playground/web dev\"",
+    "dev": "pnpm --filter @playground/shared build && concurrently -k -n api,web,worker \"pnpm --filter @playground/api dev\" \"pnpm --filter @playground/web dev\" \"pnpm --filter @playground/api worker\"",
+    "worker": "pnpm --filter @playground/shared build && pnpm --filter @playground/api worker",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint .",

@@ -5,8 +5,10 @@ import { openDatabase } from './database.js';
 import { ZodError } from 'zod';
 import { accountRoutes, type AuthOptions } from './routes.js';
 import { PublicGitHubClient, GitHubError, type GitHubReader } from './github.js';
+import type { RuntimeOptions } from './builds.js';
+import { resolve } from 'node:path';
 
-export function createApp(databasePath: string, logger = false, options: AuthOptions = { origin: 'http://127.0.0.1:5173', secureCookies: false }, github: GitHubReader = new PublicGitHubClient()) {
+export function createApp(databasePath: string, logger = false, options: AuthOptions = { origin: 'http://127.0.0.1:5173', secureCookies: false }, github: GitHubReader = new PublicGitHubClient(), runtime: RuntimeOptions = { storage: resolve('data/builds'), gameOrigin: 'http://127.0.0.2:3003' }) {
   const database = openDatabase(databasePath);
   const app = Fastify({
     bodyLimit: 64 * 1024,
@@ -30,7 +32,7 @@ export function createApp(databasePath: string, logger = false, options: AuthOpt
     database.db.get(sql`SELECT 1`);
     return healthSchema.parse({ status: 'ok', database: 'ok' });
   });
-  app.register(async scope => { await accountRoutes(scope, database.sqlite, options, github); });
+  app.register(async scope => { await accountRoutes(scope, database.sqlite, options, github, runtime); });
   app.addHook('onClose', async () => { database.sqlite.close(); });
   return app;
 }

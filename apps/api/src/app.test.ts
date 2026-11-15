@@ -29,7 +29,7 @@ test('migrations are repeatable and data survives reopening with WAL and foreign
       assert.deepEqual(second.sqlite.prepare("SELECT value FROM platform_metadata WHERE key = 'test'").get(), { value: 'persisted' });
       assert.equal(second.sqlite.pragma('journal_mode', { simple: true }), 'wal');
       assert.equal(second.sqlite.pragma('foreign_keys', { simple: true }), 1);
-      assert.deepEqual(second.sqlite.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get(), { count: 4 });
+      assert.deepEqual(second.sqlite.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get(), { count: 5 });
     } finally { second.sqlite.close(); }
   } finally { rmSync(directory, { recursive: true, force: true }); }
 });
@@ -38,5 +38,6 @@ test('invalid environment values fail validation', () => {
   assert.equal(envSchema.safeParse({ PORT: '0' }).success, false);
   assert.equal(envSchema.safeParse({ NODE_ENV: 'unknown' }).success, false);
   assert.equal(envSchema.safeParse({ NODE_ENV: 'production' }).success, false);
-  assert.equal(envSchema.safeParse({ NODE_ENV: 'production', APP_ORIGIN: 'https://portal.example.test' }).success, true);
+  assert.equal(envSchema.safeParse({ NODE_ENV: 'production', APP_ORIGIN: 'https://portal.example.test', GAME_ORIGIN: 'https://games.example.test' }).success, true);
+  assert.equal(envSchema.safeParse({ APP_ORIGIN: 'http://127.0.0.1:5173', GAME_ORIGIN: 'http://127.0.0.1:3003' }).success, false);
 });

@@ -10,6 +10,15 @@ fieldset{border:0;padding:0;margin:0;min-width:0}.field{display:flex;flex-direct
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important}}
 
 /* Games and team feedback. */
+.build-logs { max-height: 360px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; background: #0b1420; padding: 16px; border-radius: 8px; font-size: 11px; line-height: 1.7; }
+.build-result { margin-top: 20px; }
+.release-list { margin-top: 24px; border-top: 1px solid #33465b; padding-top: 12px; }
+.release-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 14px 0; border-bottom: 1px solid #33465b; font-size: 13px; }
+.release-row small { display: block; margin-top: 6px; }
+.player { margin-top: 24px; }
+.player > .button-row { margin-bottom: 16px; align-items: center; font-size: 13px; }
+.player iframe { display: block; width: 100%; height: min(76vh, 800px); min-height: 400px; border: 1px solid #33465b; border-radius: 12px; background: #000; }
+.player iframe:fullscreen { height: 100vh; border: 0; }
 .repository-panel { border-top: 1px solid #33465b; margin-top: 28px; padding-top: 20px; }
 .repository-panel .section-heading { margin-bottom: 8px; }
 .repository-panel .section-heading h3 { margin: 0; }

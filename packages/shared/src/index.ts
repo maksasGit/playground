@@ -30,6 +30,7 @@ export const gameSchema = z.object({
   id: z.string(), slug: z.string(), title: z.string(), description: z.string(),
   cover: z.string().nullable(), updatedAt: z.number(), canComment: z.boolean(),
   archived: z.boolean(), canModerate: z.boolean(),
+  activeReleaseId: z.string().nullable(), deployedCommitSha: z.string().nullable(),
 });
 export const gameInputSchema = z.object({
   title: z.string().trim().min(1, 'Введите название игры.').max(100, 'Название: максимум 100 символов.'),
@@ -72,3 +73,17 @@ export const repositorySchema = z.object({
   status: z.enum(['not_checked', 'not_published', 'up_to_date', 'update_available']),
 });
 export type Repository = z.infer<typeof repositorySchema>;
+export const buildRootSchema = z.string().trim().max(200).refine(value => value === '.' || (
+  /^[a-zA-Z0-9_.-]+(?:\/[a-zA-Z0-9_.-]+)*$/.test(value) && !value.split('/').some(part => part === '.' || part === '..')
+), 'Укажите . для корня репозитория или относительную папку, например needle-in-a-haystack.');
+export const buildJobSchema = z.object({
+  id: z.string(), gameId: z.string(), commitSha: z.string(), buildRoot: z.string(),
+  status: z.enum(['queued', 'running', 'succeeded', 'failed']),
+  releaseId: z.string().nullable(), logs: z.string(), error: z.string().nullable(), createdAt: z.number(),
+});
+export const releaseSchema = z.object({ id: z.string(), commitSha: z.string(), createdAt: z.number(), size: z.number(), active: z.boolean() });
+export const buildsSchema = z.object({
+  workerReady: z.boolean(), workerMessage: z.string(),
+  jobs: z.array(buildJobSchema), releases: z.array(releaseSchema),
+});
+export type BuildJob = z.infer<typeof buildJobSchema>;

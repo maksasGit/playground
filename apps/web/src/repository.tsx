@@ -17,6 +17,7 @@ export function RepositoryPanel({ gameId, archived }: { gameId: string; archived
   const [retry, setRetry] = useState(0);
   const action = useAction();
   const base = `/admin/games/${gameId}/repository`;
+  useEffect(() => { const refresh = () => setRetry(value => value + 1); window.addEventListener('release-changed', refresh); return () => window.removeEventListener('release-changed', refresh); }, []);
   useEffect(() => {
     let active = true;
     setLoading(true); setLoadError('');

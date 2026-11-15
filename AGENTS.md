@@ -27,6 +27,8 @@ This file is the primary instruction document for coding agents working on Playg
 
 **User update (2026-11-15):** initial scope is three developers, running locally on the owner's laptop with a future VPS migration. Game repositories are currently public. M3 must accept a GitHub repository URL without credentials, always use `main`, and check updates only on demand. GitHub App/private repository support and branch selection are deferred until requested. This update supersedes the corresponding original defaults below and in the M3 milestone.
 
+**M4 architecture approval (2026-11-15):** the owner explicitly approved the local disposable Docker build and separate game host/play-ticket scheme in `docs/build-isolation.md`. Work within that approved boundary; do not request the same approval again. Untrusted scripts remain confined to the network-disconnected, non-root build container. Local game origin: `http://127.0.0.2:3003`; production origins still require configuration and HTTPS.
+
 - Hosting: one VPS.
 - Expected users: 3–10 initially.
 - Games: browser-based HTML5 games using Vite, JavaScript, or TypeScript.

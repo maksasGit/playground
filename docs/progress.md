@@ -67,3 +67,20 @@ Additive migration 0004 preserves current accounts, games, comments and covers. 
 Verification: 28 server tests passed, all three Edge browser scenarios passed (including desktop/mobile repository UI), build/typecheck/lint passed. A real unauthenticated client read the main commit of maksasGit/needle successfully without writing the working database. Docker runtime remains untested.
 
 Next: M4 — isolated source download/build, artifact validation, publication and rollback. Builder isolation must be reviewed before untrusted scripts run. GitHub App/private repositories and selectable branches remain deferred per the owner's explicit update.
+
+## M4 — Isolated builds, publication, rollback and protected play
+
+Owner explicitly approved docs/build-isolation.md before repository scripts were run. Implemented durable single-worker SQLite queue, worker lease/recovery/standby, immutable SHA archives, npm/pnpm lockfile preset, registry-only install proxy with scripts disabled, network-disconnected build, non-root/read-only/CPU/memory/process/tmpfs limits and runtime isolation verification. Nested project detection found needle-in-a-haystack automatically.
+
+Host-side tar validation rejects traversal, links, unsupported files, duplicate/case-alias paths and oversized artifacts. Successful artifacts publish via an atomic database pointer; previous releases remain for rollback. Game tickets are random, hashed, hour-limited, release/session-scoped and checked against current access on every asset. Game origin 127.0.0.2:3003 receives no portal cookies. UI provides queue/status/logs, saved releases, rollback, Play, fullscreen and standalone launch.
+
+Verification performed:
+
+- 35 server tests passed, including artifacts, ownership/authorization, ticket expiry/revocation, atomic failure preservation, lease/recovery and rollback.
+- Build/typecheck/lint passed.
+- Five Edge browser scenarios passed, including queue/publish/failed rebuild/rollback and real needle Docker-artifact play. Real game rendered WebGL; all 13 artifact files, fullscreen and desktop/mobile layout were checked.
+- Actual immutable needle build: commit 850b46f169b9a5d9f32e7aed2d42891e7c13513e, 13 files / 5,773,597 bytes. Installation completed without lifecycle scripts; build ran after network removal. Containers/networks were cleaned.
+- A separate real worker smoke test exercised API → durable queue → worker → Docker → immutable publication using an isolated database. Working accounts, games and comments were not replaced or seeded.
+- Native portal and distinct game origin responded; unauthenticated game asset requests were denied. Compose syntax checked; full Compose worker/VPS deployment not claimed.
+
+Limitations: preset excludes custom npm configs/hooks/workspaces and install scripts; old releases are retained without automatic GC. Pointer-lock interaction, actual audio output and non-Edge browsers were not automatically verified. Next: operational VPS/HTTPS/backups (M5) and the agreed Vault module; local game publishing/play is available now.
