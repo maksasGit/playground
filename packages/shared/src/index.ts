@@ -29,8 +29,26 @@ export const updateUserSchema = createUserSchema.omit({ username: true, password
 export const gameSchema = z.object({
   id: z.string(), slug: z.string(), title: z.string(), description: z.string(),
   cover: z.string().nullable(), updatedAt: z.number(), canComment: z.boolean(),
+  archived: z.boolean(), canModerate: z.boolean(),
+});
+export const gameInputSchema = z.object({
+  title: z.string().trim().min(1, 'Введите название игры.').max(100, 'Название: максимум 100 символов.'),
+  slug: z.string().trim().min(1).max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Адрес: строчные латинские буквы, цифры и дефисы.'),
+  description: z.string().trim().max(5000, 'Описание: максимум 5000 символов.').default(''),
+}).strict();
+export const commentInputSchema = z.object({
+  body: z.string().trim().min(1, 'Напишите комментарий.').max(4000, 'Комментарий: максимум 4000 символов.'),
+}).strict();
+export const commentSchema = z.object({
+  id: z.string(), gameId: z.string(), authorId: z.string(), authorName: z.string(),
+  body: z.string(), createdAt: z.number(), editedAt: z.number().nullable(),
+  status: z.enum(['visible', 'hidden']), canEdit: z.boolean(),
+});
+export const commentsPageSchema = z.object({
+  comments: z.array(commentSchema), total: z.number(), offset: z.number(), limit: z.number(),
 });
 export type User = z.infer<typeof userSchema>;
 export type Session = z.infer<typeof sessionSchema>;
 export type Game = z.infer<typeof gameSchema>;
 export type Role = z.infer<typeof roleSchema>;
+export type Comment = z.infer<typeof commentSchema>;

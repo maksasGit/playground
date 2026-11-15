@@ -20,7 +20,7 @@ This implements the authentication model already specified in AGENTS.md. It does
 
 ## Authorization and data
 
-- Admin has full game access. Tester and Viewer need explicit game grants. A missing grant returns 404 for game details and excludes the game from the library. Viewer is never marked as able to comment. Comment write endpoints arrive with M2 and must enforce the role independently.
+- Admin has full game access. Tester and Viewer need explicit game grants. A missing grant returns 404 for game details and excludes the game from the library. In M2, comment write endpoints enforce role and game access independently of the UI; Viewer can only read. Cover downloads enforce the same game grants.
 - Vault grants are stored separately as read/upload/manage permissions. File operations and enforcement of these grants arrive with the Vault module; there are no file-serving endpoints at M1.
 - The last active administrator cannot be disabled or demoted. Check and mutation happen in one immediate SQLite transaction, including competing changes.
 - All queries use bound parameters. User-supplied text is rendered by React as text. API replies do not include password hashes, session token digests, or other users' credentials.

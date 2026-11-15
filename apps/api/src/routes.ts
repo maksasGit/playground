@@ -4,31 +4,15 @@ import rateLimit from '@fastify/rate-limit';
 import { verify } from 'argon2';
 import { z } from 'zod';
 import type Database from 'better-sqlite3';
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyInstance, FastifyReply } from 'fastify';
 import { createUserSchema, passwordSchema, updateUserSchema } from '@playground/shared';
 import { audit, createAccount, hashPassword, publicUser, setGrants, type UserRow } from './accounts.js';
-
-interface Auth { user: UserRow; sessionId: string; csrfToken: string }
-declare module 'fastify' { interface FastifyRequest { auth: Auth | null } }
+import { fail, requireUser, requireAdmin } from './access.js';
+import { gameRoutes } from './games.js';
 export interface AuthOptions { origin: string; secureCookies: boolean }
 const SESSION_MS = 12 * 60 * 60 * 1000;
 const digest = (token: string) => createHash('sha256').update(token).digest('hex');
 
-export function fail(statusCode: number, message: string): never {
-  throw Object.assign(new Error(message), { statusCode });
-}
-function requireUser(request: FastifyRequest, allowPasswordChange = false) {
-  if (!request.auth) fail(401, 'Войдите в аккаунт.');
-  if (request.auth.user.must_change_password && !allowPasswordChange) fail(403, 'Сначала смените начальный пароль.');
-  return request.auth;
-}
-function requireAdmin(request: FastifyRequest, sqlite: Database.Database) {
-  const auth = requireUser(request);
-  const user = sqlite.prepare('SELECT * FROM users WHERE id = ?').get(auth.user.id) as UserRow | undefined;
-  const live = sqlite.prepare('SELECT 1 FROM sessions WHERE id = ? AND revoked_at IS NULL AND expires_at > ?').get(auth.sessionId, Date.now());
-  if (!live || !user || user.status !== 'active' || user.role !== 'Admin' || user.must_change_password) fail(403, 'Недостаточно прав.');
-  return user;
-}
 
 export async function accountRoutes(app: FastifyInstance, sqlite: Database.Database, options: AuthOptions) {
   await app.register(cookie);
@@ -178,23 +162,5 @@ export async function accountRoutes(app: FastifyInstance, sqlite: Database.Datab
     return { ok: true };
   });
 
-  function availableGames(request: FastifyRequest) {
-    const { user } = requireUser(request);
-    return sqlite.prepare(`SELECT g.* FROM games g WHERE g.archived = 0 AND (? = 'Admin' OR EXISTS
-      (SELECT 1 FROM game_access a WHERE a.game_id = g.id AND a.user_id = ?)) ORDER BY g.updated_at DESC, g.id`).all(user.role, user.id) as {
-        id: string; slug: string; title: string; description: string; cover: string | null; updated_at: number;
-      }[];
-  }
-  const toGame = (row: ReturnType<typeof availableGames>[number], request: FastifyRequest) => ({
-    id: row.id, slug: row.slug, title: row.title, description: row.description,
-    cover: row.cover, updatedAt: row.updated_at, canComment: request.auth?.user.role !== 'Viewer',
-  });
-  app.get('/api/games', async request => ({ games: availableGames(request).map(row => toGame(row, request)) }));
-  app.get('/api/games/:slug', async request => {
-    const { slug } = z.object({ slug: z.string().max(100) }).parse(request.params);
-    const game = availableGames(request).find(row => row.slug === slug);
-    if (!game) fail(404, 'Игра не найдена или доступ не предоставлен.');
-    return { game: toGame(game, request) };
-  });
-  // Game files are not exposed at M1. Private delivery arrives with isolated releases.
+  await gameRoutes(app, sqlite);
 }

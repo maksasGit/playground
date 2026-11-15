@@ -45,3 +45,15 @@ Remaining limitations: no game CRUD, comment posting, game launch/builds, GitHub
 Replaced the handwritten raw terminal reader with Inquirer prompts. Username and password validation now happens before confirmation, with specific errors and retries in place. Password input is masked with asterisks. The 12–128 character policy is unchanged; no owner credentials or working data were modified.
 
 Verified: 13 server tests, API typecheck/build, lint, and interactive PowerShell checks of short-password feedback, confirmation mismatch, cancellation and successful creation on a separate test database.
+
+## M2 — Games and Comments
+
+Implemented admin game creation/editing, reversible archive, private image covers, a featured project and horizontal library shelf, game-detail pages, authenticated comments, author edits, Admin hide/restore, pagination and per-user posting limits. Game IDs preserve discussion and grants across renames and archiving. Additive migration 0003 preserves existing accounts and sessions.
+
+Verification:
+
+- `pnpm test`: 19 tests passed. Added coverage for game CRUD permissions and validation, cover re-encoding/access/upload rejection/limits, comment role/ownership/CSRF, moderation, archive/restore, pagination, renames, restart persistence and shared per-user write limits.
+- `PLAYWRIGHT_CHANNEL=msedge pnpm test:e2e`: both scenarios passed, including account flow and the complete game/editor/tester workflow. Desktop and mobile screenshots reviewed; no horizontal overflow at 390px, no browser page errors, stored HTML-like text remains inert.
+- Build, typecheck and lint passed. Docker runtime remains untested; the local Node/Vite servers are the current target.
+
+No test games or credentials were inserted into the owner's database. Current game entries are metadata/discussion pages; launch is unavailable until releases exist. Next: M3 — GitHub App configuration, private repository access, branch selection and manual commit checks. Builder isolation and private artifact delivery remain later decisions requiring review.
