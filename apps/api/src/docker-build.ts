@@ -4,6 +4,7 @@ import { join, resolve } from 'node:path';
 import { Readable } from 'node:stream';
 import { buildRootSchema, commitShaSchema, repositoryUrlSchema } from '@playground/shared';
 import { extractArtifact } from './artifacts.js';
+import { config } from './config.js';
 
 const image = 'playground-builder:node22-v1';
 export function cleanLog(value: string) {
@@ -70,16 +71,18 @@ export async function buildInDocker(input: BuildInput, root: string, storage: st
     await run(['run', '-d', '--name', proxy, ...limits, '--memory=128m', '--cpus=0.25', '--mount', `type=bind,source=${join(runner, 'proxy.mjs')},target=/proxy.mjs,readonly`, image, 'node', '/proxy.mjs']);
     await run(['network', 'connect', '--alias', 'registry-proxy', network, proxy]);
     const clearProxy = ['HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY', 'NO_PROXY', 'http_proxy', 'https_proxy', 'all_proxy', 'no_proxy'].flatMap(name => ['--env', `${name}=`]);
-    await run(['create', '--name', container, ...limits, ...clearProxy, '--cpus=2', '--memory=3g', '--memory-swap=3g', '--network', network,
+    const memoryBytes = config.BUILD_MEMORY_MB * 1024 ** 2;
+    const nanoCpus = config.BUILD_CPUS * 1_000_000_000;
+    await run(['create', '--name', container, ...limits, ...clearProxy, `--cpus=${config.BUILD_CPUS}`, `--memory=${config.BUILD_MEMORY_MB}m`, `--memory-swap=${config.BUILD_MEMORY_MB}m`, '--network', network,
       '--tmpfs', '/work:rw,exec,nosuid,nodev,size=1073741824,uid=1000,gid=1000,mode=0700', '--tmpfs', '/tmp:rw,nosuid,nodev,size=67108864,mode=1777',
       '--mount', `type=bind,source=${archive},target=/input/source.tgz,readonly`, '--mount', `type=bind,source=${runner},target=/runner,readonly`, image]);
     await run(['start', container]);
     const inspected = JSON.parse(await run(['inspect', '--format', '{{json .}}', container]));
     const host = inspected.HostConfig;
-    if (host.Privileged || !host.ReadonlyRootfs || host.Memory !== 3 * 1024 ** 3 || host.MemorySwap !== 3 * 1024 ** 3 || host.NanoCpus !== 2_000_000_000 || host.PidsLimit !== 128 || inspected.Config.User !== '1000:1000'
+    if (host.Privileged || !host.ReadonlyRootfs || host.Memory !== memoryBytes || host.MemorySwap !== memoryBytes || host.NanoCpus !== nanoCpus || host.PidsLimit !== 128 || inspected.Config.User !== '1000:1000'
       || !host.CapDrop?.includes('ALL') || !host.SecurityOpt?.includes('no-new-privileges')
       || inspected.Mounts.some((mount: { Type: string; Destination: string; RW: boolean }) => mount.Type === 'bind' && (mount.RW || !['/runner', '/input/source.tgz'].includes(mount.Destination)))) throw new Error('Build container isolation verification failed');
-    log('Isolation verified: non-root, read-only root, 2 CPUs, 3 GiB, 128 processes, no host secrets or socket mounts.\n');
+    log(`Isolation verified: non-root, read-only root, ${config.BUILD_CPUS} CPUs, ${config.BUILD_MEMORY_MB} MiB, 128 processes, no host secrets or socket mounts.\n`);
     log('Installing lockfile dependencies through the registry proxy; scripts disabled.\n');
     await run(['exec', container, 'node', '/runner/runner.mjs', 'install', buildRoot]);
     const actualRoot = buildRootSchema.parse(await run(['exec', container, 'cat', '/work/project-root']));

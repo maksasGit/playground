@@ -11,6 +11,8 @@ export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   APP_ORIGIN: z.string().url().default('http://127.0.0.1:5173'),
   BUILDS_PATH: z.string().min(1).default('./data/builds'),
+  BUILD_MEMORY_MB: z.coerce.number().int().min(512).max(3072).default(3072),
+  BUILD_CPUS: z.coerce.number().min(0.25).max(2).multipleOf(0.25).default(2),
   GAME_ORIGIN: z.string().url().default('http://127.0.0.2:3003'),
   GAME_HOST: z.string().default('127.0.0.2'),
   GAME_PORT: z.coerce.number().int().min(1).max(65535).default(3003),

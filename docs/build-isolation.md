@@ -31,3 +31,7 @@ Verified: 35 server tests, browser build/play/failure/rollback flow, real worker
 All successful releases are retained (the UI shows the latest 50). There is no automatic garbage collection yet. At least 1 GiB of free host disk space is required before a build. Back up SQLite and the release files together while API and worker are stopped. Compose portal/file serving is configured, but full Compose-host worker deployment and public VPS HTTPS remain M5 work; local native Node plus Docker is the verified deployment.
 
 Docker shares a kernel/VM and is not a perfect boundary for hostile third-party repositories. This design is for the owner's team's repositories. Arbitrary shell commands, credentials in builds, unbounded host mounts and automatic publication remain disallowed.
+
+## Small VPS configuration
+
+Builder limits can be reduced through BUILD_MEMORY_MB (512-3072 MiB, integer) and BUILD_CPUS (0.25-2, in steps of 0.25) in the root .env. Defaults remain 3072 MiB and 2 CPUs. For the owner's trial VPS (1 CPU, 2 GiB RAM), start with BUILD_MEMORY_MB=1024 and BUILD_CPUS=1. Docker inspection verifies the configured limits, including disabling container swap. Other isolation limits remain unchanged. The 1 GiB work tmpfs shares the container memory limit, so larger projects may fail with out-of-memory errors on this preset. Failed builds retain the previous release. This profile is not yet verified with a real game on the VPS; measure its build and host usage before claiming this is sufficient. Restart the worker after changing limits.
