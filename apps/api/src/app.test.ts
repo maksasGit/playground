@@ -29,7 +29,7 @@ test('migrations are repeatable and data survives reopening with WAL and foreign
       assert.deepEqual(second.sqlite.prepare("SELECT value FROM platform_metadata WHERE key = 'test'").get(), { value: 'persisted' });
       assert.equal(second.sqlite.pragma('journal_mode', { simple: true }), 'wal');
       assert.equal(second.sqlite.pragma('foreign_keys', { simple: true }), 1);
-      assert.deepEqual(second.sqlite.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get(), { count: 1 });
+      assert.deepEqual(second.sqlite.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get(), { count: 2 });
     } finally { second.sqlite.close(); }
   } finally { rmSync(directory, { recursive: true, force: true }); }
 });
@@ -37,4 +37,6 @@ test('migrations are repeatable and data survives reopening with WAL and foreign
 test('invalid environment values fail validation', () => {
   assert.equal(envSchema.safeParse({ PORT: '0' }).success, false);
   assert.equal(envSchema.safeParse({ NODE_ENV: 'unknown' }).success, false);
+  assert.equal(envSchema.safeParse({ NODE_ENV: 'production' }).success, false);
+  assert.equal(envSchema.safeParse({ NODE_ENV: 'production', APP_ORIGIN: 'https://portal.example.test' }).success, true);
 });

@@ -17,3 +17,25 @@ Validated on Windows with Node.js 22.13.1:
 Runtime data is ignored by Git. No credentials or default passwords were created. Current functionality is a foundation, not a complete platform. Next: M1, administrator bootstrap, individual accounts, session security, permissions and portal pages. Security-sensitive build isolation and private game delivery remain pending design approval before their milestones.
 
 Current deployment target: owner's work laptop, three developers, sequential builds acceptable. Keep configuration and persistent data portable to a future VPS.
+
+## M1 — Authentication and Portal
+
+Implemented:
+
+- One-time interactive administrator bootstrap with hidden password input and confirmation.
+- Individual accounts, Argon2id password hashes, login/logout, mandatory first/reset password change.
+- Persistent server-side sessions with token hashes, 12-hour expiry, CSRF protection, login rate limiting, production Secure cookies and HTTPS-origin validation.
+- User administration: create, role, display name, enable/disable, reset password, revoke sessions, per-game grants and independent Vault grants.
+- Atomic protection of the last active administrator, administrative audit events and safe logging.
+- Responsive Playground Dark login, library, game-detail shell, account page and team-management screens.
+- Read-only game APIs enforce grants and expose no private file storage. Actual game creation, covers, comments and published releases are later milestones.
+
+Verification executed on the local Windows laptop:
+
+- `pnpm build`, `pnpm typecheck`, `pnpm lint`: passed.
+- `pnpm test`: 10 tests passed, including first-login gating, password/session rotation, CSRF, rate limiting, disabled/reset accounts, competing administrator demotions, game grants and audit secrecy.
+- `PLAYWRIGHT_CHANNEL=msedge pnpm test:e2e`: passed in installed Microsoft Edge. Covered administrator login/password change, session restore on refresh, creating a Viewer with one game grant, Viewer password change, hidden unauthorized games/admin page, safe text rendering and logout. Checked 390px mobile layout and visually reviewed desktop/mobile screenshots.
+- CLI bootstrap tested with a separate disposable database: hidden input, confirmation, successful creation, and rejection of repeated bootstrap. No owner account or default password was created in the real database.
+- `docker compose config --quiet`: passed. Docker images/runtime and actual HTTPS deployment remain untested because Docker Engine is unavailable.
+
+Remaining limitations: no game CRUD, comment posting, game launch/builds, GitHub connection or Vault file operations yet. Vault permissions are stored for later use. Game/Vault file URLs remain unavailable. Local services must not be exposed publicly. Next milestone: M2 — game management and authenticated comments.

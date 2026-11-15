@@ -6,3 +6,5 @@ data/
 !.env.example
 *.log
 .pnpm-store/
+test-results/
+playwright-report/

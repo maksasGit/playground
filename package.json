@@ -8,13 +8,16 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint .",
     "test": "pnpm --filter @playground/api test",
-    "db:migrate": "pnpm --filter @playground/api db:migrate"
+    "test:e2e": "pnpm --filter @playground/shared build && playwright test",
+    "db:migrate": "pnpm --filter @playground/api db:migrate",
+    "admin:create": "pnpm --filter @playground/shared build && pnpm --filter @playground/api admin:create"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
-    "eslint": "^9.0.0",
-    "typescript-eslint": "^8.0.0",
+    "@playwright/test": "^1.65.1",
     "concurrently": "^9.0.0",
-    "typescript": "~5.8.3"
+    "eslint": "^9.0.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.0.0"
   }
 }

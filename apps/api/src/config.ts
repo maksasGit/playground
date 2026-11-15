@@ -9,5 +9,14 @@ export const envSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(3001),
   DATABASE_PATH: z.string().min(1).default('./data/database/playground.sqlite'),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  APP_ORIGIN: z.string().url().default('http://127.0.0.1:5173'),
+}).superRefine((value, context) => {
+  const origin = new URL(value.APP_ORIGIN);
+  if (origin.origin !== value.APP_ORIGIN || !['http:', 'https:'].includes(origin.protocol)) {
+    context.addIssue({ code: 'custom', path: ['APP_ORIGIN'], message: 'APP_ORIGIN must be an exact HTTP(S) origin without a trailing slash.' });
+  }
+  if (value.NODE_ENV === 'production' && origin.protocol !== 'https:') {
+    context.addIssue({ code: 'custom', path: ['APP_ORIGIN'], message: 'Production requires an HTTPS origin.' });
+  }
 });
 export const config = envSchema.parse(process.env);

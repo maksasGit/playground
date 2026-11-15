@@ -3,4 +3,8 @@ node_modules
 **/dist
 .git
 .env
+.env.*
+!.env.example
 data
+test-results
+playwright-report
