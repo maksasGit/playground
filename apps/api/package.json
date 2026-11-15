@@ -14,6 +14,8 @@
   "dependencies": {
     "@fastify/cookie": "^11.1.5",
     "@fastify/rate-limit": "^10.3.0",
+    "@inquirer/input": "^4.3.1",
+    "@inquirer/password": "^4.0.23",
     "@playground/shared": "workspace:*",
     "argon2": "^0.44.0",
     "better-sqlite3": "^11.10.0",

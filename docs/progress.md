@@ -39,3 +39,9 @@ Verification executed on the local Windows laptop:
 - `docker compose config --quiet`: passed. Docker images/runtime and actual HTTPS deployment remain untested because Docker Engine is unavailable.
 
 Remaining limitations: no game CRUD, comment posting, game launch/builds, GitHub connection or Vault file operations yet. Vault permissions are stored for later use. Game/Vault file URLs remain unavailable. Local services must not be exposed publicly. Next milestone: M2 — game management and authenticated comments.
+
+### Bootstrap input fix
+
+Replaced the handwritten raw terminal reader with Inquirer prompts. Username and password validation now happens before confirmation, with specific errors and retries in place. Password input is masked with asterisks. The 12–128 character policy is unchanged; no owner credentials or working data were modified.
+
+Verified: 13 server tests, API typecheck/build, lint, and interactive PowerShell checks of short-password feedback, confirmation mismatch, cancellation and successful creation on a separate test database.

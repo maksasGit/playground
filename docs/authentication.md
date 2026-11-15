@@ -5,7 +5,7 @@ This implements the authentication model already specified in AGENTS.md. It does
 ## Credentials and bootstrap
 
 - Argon2id, 64 MiB memory, 3 iterations, parallelism 1, independent random salt per password. Passwords must contain 12–128 characters.
-- The one-time interactive `admin:create` command creates the first Admin. Passwords are entered without terminal echo and confirmed; there are no credentials in command arguments, environment defaults or source code.
+- The one-time interactive `admin:create` command creates the first Admin. Passwords are masked with asterisks and confirmed using Inquirer terminal prompts; invalid fields can be retried in place, with specific messages that never contain the password. There are no credentials in command arguments, environment defaults or source code.
 - All new and reset accounts must change their password before any library or administration access. Password change requires the current password and rotates the session.
 - Only a live Admin session can create or manage subsequent users. Usernames are normalized to lowercase and unique without regard to case. No public registration or account deletion endpoint exists.
 
