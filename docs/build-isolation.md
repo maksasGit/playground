@@ -35,3 +35,8 @@ Docker shares a kernel/VM and is not a perfect boundary for hostile third-party 
 ## Small VPS configuration
 
 Builder limits can be reduced through BUILD_MEMORY_MB (512-3072 MiB, integer) and BUILD_CPUS (0.25-2, in steps of 0.25) in the root .env. Defaults remain 3072 MiB and 2 CPUs. For the owner's trial VPS (1 CPU, 2 GiB RAM), start with BUILD_MEMORY_MB=1024 and BUILD_CPUS=1. Docker inspection verifies the configured limits, including disabling container swap. Other isolation limits remain unchanged. The 1 GiB work tmpfs shares the container memory limit, so larger projects may fail with out-of-memory errors on this preset. Failed builds retain the previous release. This profile is not yet verified with a real game on the VPS; measure its build and host usage before claiming this is sufficient. Restart the worker after changing limits.
+
+
+## Embedded GLB textures (2026-11-16)
+
+Game responses permit `connect-src 'self' blob:`. Three.js GLTFLoader extracts embedded images from GLB buffers into object URLs, and ImageBitmapLoader reads those URLs with fetch before decoding. Allowing blob images only through img-src does not cover that fetch. External network destinations remain disallowed; ticket/session checks, separate game origin and iframe permissions are unchanged. This fixes the policy mismatch that can leave the textured cart gray. Added a header regression assertion to the existing game-host access test; tests/build/browser checks were not run at the owner's request. Restart the game-host process and relaunch the game to receive the updated document policy; rebuilding game assets is not required for this header-only fix. Manual texture verification remains pending.

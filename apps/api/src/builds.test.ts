@@ -83,6 +83,7 @@ test('play tickets authorize every asset and enforce session revocation, expiry,
     const play = await f.app.inject({ method: 'POST', url: `/api/games/${f.game.id}/play`, headers: headers(f.viewer), payload: {} }); assert.equal(play.statusCode, 200);
     const url = new URL(play.json<{ url: string }>().url); const get = (path = url.pathname, host = '127.0.0.2:3003') => f.games.inject({ url: path, headers: { host } });
     assert.equal((await get()).statusCode, 200); assert.match(String((await get()).headers['content-security-policy']), /frame-ancestors http:\/\/127.0.0.1:5173/);
+    assert.match(String((await get()).headers['content-security-policy']), /(?:^|;)\s*connect-src 'self' blob:;/);
     assert.equal((await get(url.pathname, '127.0.0.1:3003')).statusCode, 404);
     assert.equal((await get(url.pathname.replace(release, randomUUID()))).statusCode, 404);
     assert.equal((await get(url.pathname.replace('index.html', 'secret.env'))).statusCode, 404);

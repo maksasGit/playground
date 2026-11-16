@@ -29,7 +29,7 @@ export function createGameServer(databasePath: string, storage: string, portalOr
       const root = await realpath(resolve(storage, 'releases', release));
       const file = await realpath(join(root, ...name.split('/')));
       if (!file.startsWith(root + sep)) return missing();
-      reply.header('Content-Security-Policy', `default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data: blob:; media-src 'self' data: blob:; worker-src 'self' blob:; frame-ancestors ${portalOrigin}; base-uri 'self'; form-action 'none'`);
+      reply.header('Content-Security-Policy', `default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' blob:; img-src 'self' data: blob:; media-src 'self' data: blob:; worker-src 'self' blob:; frame-ancestors ${portalOrigin}; base-uri 'self'; form-action 'none'`);
       return reply.type(files[name].mime).send(await readFile(file));
     } catch { return missing(); }
   });
