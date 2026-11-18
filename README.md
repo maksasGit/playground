@@ -1,5 +1,7 @@
 # Playground
 
+Production VPS operation and automatic updates after a push to main: [deployment guide](docs/deployment.md).
+
 Закрытая платформа для трёх разработчиков. Текущий этап: M4 — сборка, публикация и запуск игр. Работают аккаунты, библиотека, обсуждения, публичный GitHub/main, изолированные Docker-сборки, журнал, защищённый запуск и откат. VPS-развёртывание и Vault — следующие этапы.
 
 ## Локальный запуск
